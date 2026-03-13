@@ -32,6 +32,7 @@ Quellhinweis und Lizenzhinweis müssen erhalten bleiben.
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+
 <style>
   :root{
     --brand-color:#0056b3;
@@ -355,24 +356,10 @@ Quellhinweis und Lizenzhinweis müssen erhalten bleiben.
     box-shadow:0 8px 18px rgba(0,0,0,0.03);
   }
   .werdegang-entry textarea{ resize:vertical; min-height:44px; }
-  .werdegang-entry .w-media{
-    grid-column: 1 / -1;
-    display:grid;
-    grid-template-columns: 220px 1fr;
-    gap:10px;
-    align-items:end;
-  }
-  .werdegang-entry .w-media label{
-    margin-bottom:4px;
-    font-size:0.78em;
-    color:var(--muted);
-  }
-  .werdegang-entry .w-media input[type="file"],
-  .werdegang-entry .w-media input[type="url"]{
-    width:100%;
-  }
 
-  .ausbildung-entry{
+  .ausbildung-entry,
+  .fortbildung-entry,
+  .schulbildung-entry{
     background:#fff;
     padding:12px;
     border:1px solid #dfe6ee;
@@ -384,10 +371,41 @@ Quellhinweis und Lizenzhinweis müssen erhalten bleiben.
     align-items:start;
     box-shadow:0 8px 18px rgba(0,0,0,0.03);
   }
-  .ausbildung-entry textarea{
+  .ausbildung-entry textarea,
+  .fortbildung-entry textarea,
+  .schulbildung-entry textarea{
     grid-column:1 / -1;
     resize:vertical;
     min-height:44px;
+  }
+
+  .werdegang-entry .w-media,
+  .ausbildung-entry .w-media,
+  .fortbildung-entry .w-media,
+  .schulbildung-entry .w-media{
+    grid-column: 1 / -1;
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    gap:10px;
+    align-items:end;
+  }
+  .werdegang-entry .w-media label,
+  .ausbildung-entry .w-media label,
+  .fortbildung-entry .w-media label,
+  .schulbildung-entry .w-media label{
+    margin-bottom:4px;
+    font-size:0.78em;
+    color:var(--muted);
+  }
+  .werdegang-entry .w-media input[type="file"],
+  .werdegang-entry .w-media input[type="url"],
+  .ausbildung-entry .w-media input[type="file"],
+  .ausbildung-entry .w-media input[type="url"],
+  .fortbildung-entry .w-media input[type="file"],
+  .fortbildung-entry .w-media input[type="url"],
+  .schulbildung-entry .w-media input[type="file"],
+  .schulbildung-entry .w-media input[type="url"]{
+    width:100%;
   }
 
   .urkunde-entry{
@@ -667,9 +685,23 @@ Quellhinweis und Lizenzhinweis müssen erhalten bleiben.
   }
   @media (max-width: 820px){
     .werdegang-entry{ grid-template-columns:1fr; }
-    .werdegang-entry .w-media{ grid-template-columns:1fr; }
     .ausbildung-entry{ grid-template-columns:1fr; }
-    .ausbildung-entry textarea{ grid-column:auto; }
+    .fortbildung-entry{ grid-template-columns:1fr; }
+    .schulbildung-entry{ grid-template-columns:1fr; }
+
+    .werdegang-entry .w-media,
+    .ausbildung-entry .w-media,
+    .fortbildung-entry .w-media,
+    .schulbildung-entry .w-media{
+      grid-template-columns:1fr;
+    }
+
+    .ausbildung-entry textarea,
+    .fortbildung-entry textarea,
+    .schulbildung-entry textarea{
+      grid-column:auto;
+    }
+
     .img-slot{ width:100%; }
   }
 
@@ -868,6 +900,194 @@ Quellhinweis und Lizenzhinweis müssen erhalten bleiben.
 
   .protection-note{ display:none; }
 
+.floating-tools-toggle{
+  position:fixed;
+  top:50%;
+  right:0;
+  transform:translateY(-50%);
+  z-index:10001;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:64px;
+  height:190px;
+  padding:16px 8px;
+  box-sizing:border-box;
+  border:1px solid #111;
+  border-right:none;
+  border-radius:18px 0 0 18px;
+  background:linear-gradient(180deg,#b7e4c7, #95d5b2);
+  color:#163022;
+  font-weight:800;
+  font-size:14px;
+  letter-spacing:0.2px;
+  box-shadow:0 14px 30px rgba(0,0,0,0.18);
+  cursor:pointer;
+  transition:filter .24s ease, width .24s ease, box-shadow .24s ease, transform .12s ease;
+  appearance:none;
+  -webkit-appearance:none;
+}
+
+.floating-tools-toggle:hover{
+  filter:brightness(1.03);
+  width:70px;
+  box-shadow:0 18px 34px rgba(0,0,0,0.22);
+}
+
+.floating-tools-toggle:active{
+  transform:translateY(-50%) scale(0.99);
+}
+
+.floating-tools-toggle .floating-tools-icon,
+.floating-tools-toggle .floating-tools-label{
+  pointer-events:none;
+  user-select:none;
+}
+
+.floating-tools-icon{
+  display:block;
+  font-size:20px;
+  line-height:1;
+  font-weight:900;
+  color:#163022;
+}
+
+.floating-tools-label{
+  display:block;
+  text-align:center;
+  line-height:1.02;
+  font-size:14px;
+  font-weight:800;
+  color:#163022;
+}
+
+@media (max-width: 640px){
+  .floating-tools-toggle{
+    width:58px;
+    height:170px;
+    padding:14px 6px;
+  }
+
+  .floating-tools-toggle:hover{
+    width:62px;
+  }
+
+  .floating-tools-icon{
+    font-size:18px;
+  }
+
+  .floating-tools-label{
+    font-size:13px;
+  }
+}
+
+@media (max-width: 640px){
+  .floating-tools-toggle{
+    width:58px;
+    min-height:170px;
+    padding:14px 6px;
+  }
+
+  .floating-tools-toggle:hover{
+    width:62px;
+  }
+
+  .floating-tools-icon{
+    font-size:18px;
+  }
+
+  .floating-tools-label{
+    font-size:13px;
+  }
+}
+.floating-tools-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,0.28);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .22s ease, visibility .22s ease;
+  z-index:10000;
+}
+
+.floating-tools-backdrop.open{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+
+.floating-tools-panel{
+  position:fixed;
+  top:50%;
+  right:78px;
+  transform:translateY(-50%) translateX(24px);
+  width:min(360px, calc(100vw - 110px));
+  background:#ffffff;
+  border:1px solid rgba(15,23,42,0.10);
+  border-radius:18px;
+  box-shadow:0 22px 48px rgba(0,0,0,0.22);
+  padding:16px;
+  z-index:10002;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .24s ease, transform .24s ease, visibility .24s ease;
+}
+
+.floating-tools-panel.open{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transform:translateY(-50%) translateX(0);
+}
+
+.floating-tools-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.floating-tools-title{
+  font-size:16px;
+  font-weight:800;
+  color:#0f172a;
+}
+
+.floating-tools-close{
+  width:36px;
+  height:36px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--brand-color);
+  font-size:20px;
+  line-height:1;
+  cursor:pointer;
+  font-weight:700;
+}
+
+.floating-tools-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+
+.floating-tools-panel .btn-main{
+  margin-top:0;
+}
+
+@media (max-width: 640px){
+  .floating-tools-panel{
+    right:68px;
+    width:min(320px, calc(100vw - 86px));
+    padding:14px;
+  }
+}
 </style>
 </head>
 
@@ -897,24 +1117,31 @@ Quellhinweis und Lizenzhinweis müssen erhalten bleiben.
   </div>
 
   <div class="spende-box">
-    <div class="spende-badge">Freiwillige Unterstützung</div>
+  <div class="spende-badge">Freiwillige Unterstützung</div>
 
-    <h3>Projekt unterstützen ☕</h3>
+  <h3>Projekt unterstützen ☕</h3>
 
-    <p>
-      Dieser Bewerbungsgenerator wird kostenlos zur Verfügung gestellt.<br>
-      Wenn er Ihnen geholfen hat, freuen wir uns über eine kleine Unterstützung.
-    </p>
+  <p>
+    Dieser Bewerbungsgenerator wird kostenlos zur Verfügung gestellt.<br>
+    Wenn er Ihnen geholfen hat, freuen wir uns über eine kleine Unterstützung.
+  </p>
 
-    <img src="https://www.bildungscampus-leipzig.de/Spende%20Bewerbungsgenerator.png" alt="QR-Code für Spenden">
+<div class="donation-bank-box">
+  <p style="margin:10px 0 6px 0;"><strong>Empfänger:</strong><br>Jugend, Kultur und Medienwerkstatt e.V.<br>Bildungscampus Leipzig</p>
+  <p style="margin:10px 0 6px 0;"><strong>IBAN:</strong><br><span id="donationIbanText">DE82 5451 0067 0968 4786 75</span></p>
+  <p style="margin:10px 0 6px 0;"><strong>Verwendungszweck:</strong><br>Unterstützung Bewerbungsgenerator</p>
 
-  
+  <button type="button" class="spende-button" onclick="copyDonationIban()">
+    IBAN kopieren
+  </button>
 
-    <p style="font-size:12px; margin-top:8px;">
-      QR-Code mit Banking-App oder PayPal scannen.
-    </p>
+  <p id="donationCopyHint" style="font-size:12px; margin-top:8px; color:#2e7d32; display:none;">
+    IBAN wurde in die Zwischenablage kopiert.
+  </p>
+</div>
 
-  </div>
+ 
+</div>
 
 </div>
   <!-- LETTERHEAD END -->
@@ -925,12 +1152,12 @@ Quellhinweis und Lizenzhinweis müssen erhalten bleiben.
     <div class="top-title">
       <h2>Berufsportfoliogenerator</h2>
       <div class="top-actions">
-        <button class="btn-secondary" onclick="saveProject()" type="button">Projekt speichern</button>
-        <button class="btn-secondary" onclick="loadProject()" type="button">Projekt laden</button>
-        <button class="btn-secondary" onclick="toggleHelp()" type="button">Anleitung</button>
-        <button class="btn-secondary" onclick="resetAll()" type="button">Zurücksetzen</button><br>
-        <div class="hint">Projektstände können zusätzlich als JSON-Datei gespeichert und später wieder geladen werden.</div><br><br>
-      </div>
+  <button class="btn-secondary" onclick="openInfoPanel('save')" type="button">Projekt speichern</button>
+  <button class="btn-secondary" onclick="openInfoPanel('load')" type="button">Projekt laden</button>
+  <button class="btn-secondary" onclick="openInfoPanel('guide')" type="button">Anleitung</button>
+  <button class="btn-secondary" onclick="openInfoPanel('reset')" type="button">Zurücksetzen</button>
+  <div class="hint">Projektstände können zusätzlich als JSON-Datei gespeichert und später wieder geladen werden.</div>
+</div>
     </div>
 
     
@@ -1067,23 +1294,14 @@ ziehen oder klicken">
         <div class="form-group" id="erwerbGroup"><label>Arbeitserlaubnis (NON-EU)</label><input id="erwerb" type="text" placeholder="vorhanden oder Beschränkung"/></div>
       </div>
 
-      <label>Zusatzbilder Personendaten (optional, max. 3) + Link<span class="label-help" title="Diese Bilder erscheinen auf der Personendatenseite. Optional kann jedes Bild mit einem Weblink verknüpft werden.">i</span></label>
+      <label>Zusatzbild Personendaten + Link<span class="label-help" title="Dieses Bild erscheinen auf der Personendatenseite. Optional kann das Bild mit einem Weblink verknüpft werden.">i</span></label>
       <div class="image-slots">
         <div class="img-slot">
           <div class="mini">Bild 1</div>
           <input accept="image/*" class="p-img" type="file"/>
           <input class="p-img-url" placeholder="Link (optional)" type="url"/>
         </div>
-        <div class="img-slot">
-          <div class="mini">Bild 2</div>
-          <input accept="image/*" class="p-img" type="file"/>
-          <input class="p-img-url" placeholder="Link (optional)" type="url"/>
-        </div>
-        <div class="img-slot">
-          <div class="mini">Bild 3</div>
-          <input accept="image/*" class="p-img" type="file"/>
-          <input class="p-img-url" placeholder="Link (optional)" type="url"/>
-        </div>
+       
       </div>
     </div>
 
@@ -1111,37 +1329,27 @@ ziehen oder klicken">
     </div>
 
     <div class="extra-section">
-      <h3>3. Ausbildung &amp; Studium<span class="label-help" title="Ausbildungen und Studiengänge werden gesammelt auf einer eigenen Seite ausgegeben.">i</span></h3>
+      <h3>3. Ausbildung &amp; Studium<span class="label-help" title="Hier tragen Sie Ausbildungen, Studiengänge oder Qualifikationen ein. Jeder Eintrag erscheint gesammelt auf einer eigenen PDF-Seite. Optional können Sie pro Eintrag ein Logo/Bild und einen Link ergänzen.">i</span></h3>
       <div id="ausbildung-liste">
         <div class="ausbildung-entry">
           <input class="a-zeit" placeholder="Zeitraum (z. B. 2012–2015)" type="text"/>
           <input class="a-institution" placeholder="Schule / Hochschule / Institution" type="text"/>
           <input class="a-abschluss" placeholder="Abschluss / Studiengang" type="text"/>
           <textarea class="a-details" placeholder="Schwerpunkte / Inhalte (jede Zeile oder ; = ein Punkt)" rows="2"></textarea>
+          <div class="w-media">
+            <div>
+              <label>Logo / Bild (optional)</label>
+              <input accept="image/*" class="a-img" type="file"/>
+            </div>
+            <div>
+              <label>Link zum Eintrag / Institution (optional)</label>
+              <input class="a-link" placeholder="https://..." type="url"/>
+            </div>
+          </div>
         </div>
       </div>
       <button class="btn-add" onclick="addAusbildung()" type="button">+ Ausbildung hinzufügen</button>
-
-      <div style="margin-top: 12px;">
-        <label>Bilder für Ausbildung/Studium (max. 3) + Link</label>
-        <div class="image-slots">
-          <div class="img-slot">
-            <div class="mini">Bild 1</div>
-            <input accept="image/*" class="a-img" type="file"/>
-            <input class="a-img-url" placeholder="Link (optional)" type="url"/>
-          </div>
-          <div class="img-slot">
-            <div class="mini">Bild 2</div>
-            <input accept="image/*" class="a-img" type="file"/>
-            <input class="a-img-url" placeholder="Link (optional)" type="url"/>
-          </div>
-          <div class="img-slot">
-            <div class="mini">Bild 3</div>
-            <input accept="image/*" class="a-img" type="file"/>
-            <input class="a-img-url" placeholder="Link (optional)" type="url"/>
-          </div>
-        </div>
-      </div>
+      <div class="helper">Pro Eintrag kann ein eigenes Logo oder Bild mit passender Verlinkung eingefügt werden.</div>
     </div>
 
     <div class="extra-section">
@@ -1192,30 +1400,22 @@ ziehen oder klicken">
     </div>
 
     <div class="extra-section">
-      <h3>5. Motivation</h3>
+      <h3>6. Motivation</h3>
       <textarea id="motivationText" placeholder="Ihr Motivationsschreiben... Warum dieses Unternehmen? Warum diese Stelle? Warum sind Sie für dieses Unternehmen wichtig?" rows="3"></textarea>
-      <label>Bilder für Motivation (max. 3) + Link</label>
+      <label>Bild für Motivation + Link</label>
       <div class="image-slots">
         <div class="img-slot">
           <div class="mini">Bild 1</div>
           <input accept="image/*" class="m-img" type="file"/>
           <input class="m-img-url" placeholder="Link (optional)" type="url"/>
         </div>
-        <div class="img-slot">
-          <div class="mini">Bild 2</div>
-          <input accept="image/*" class="m-img" type="file"/>
-          <input class="m-img-url" placeholder="Link (optional)" type="url"/>
-        </div>
-        <div class="img-slot">
-          <div class="mini">Bild 3</div>
-          <input accept="image/*" class="m-img" type="file"/>
-          <input class="m-img-url" placeholder="Link (optional)" type="url"/>
-        </div>
+       
+       
       </div>
     </div>
 
     <div class="extra-section">
-      <h3>6. Kompetenzbilanz</h3>
+      <h3>7. Kompetenzbilanz</h3>
       <textarea id="kompetenzText" placeholder="Ihre Stärken... Z.B.: Teamfähigkeit, Offenheit für neue Aufgaben, Belastbarkeit usw." rows="3"></textarea>
       <label>Bilder für Kompetenzbilanz (max. 3) + Link</label>
       <div class="image-slots">
@@ -1238,7 +1438,7 @@ ziehen oder klicken">
     </div>
 
     <div class="extra-section">
-      <h3>7. Urkunden &amp; Zeugnisse</h3>
+      <h3>8. Urkunden &amp; Zeugnisse</h3>
       <div id="urkunden-liste"></div>
       <button class="btn-add" onclick="addUrkunde()" type="button">+ Urkunde hinzufügen</button>
     </div>
@@ -1250,8 +1450,9 @@ ziehen oder klicken">
         <h3 style="margin-top:0;">Vorschau</h3>
         <iframe id="pdfPreview" class="pdf-preview" title="PDF Vorschau"></iframe>
         <div class="preview-actions">
-          <button class="btn-secondary" onclick="refreshPreview()" type="button">Vorschau aktualisieren</button>
-        </div>
+  <button class="btn-secondary" onclick="openInfoPanel('preview')" type="button">Vorschau aktualisieren</button>
+  <button class="btn-secondary" onclick="refreshPreview()" type="button">Jetzt aktualisieren</button>
+</div>
         <div class="hint" style="margin-top:8px;">
           Hinweis: Die Vorschau rendert das PDF im Browser. Für die finale Datei bitte weiterhin <b>PDF SPEICHERN</b> verwenden.
         </div>
@@ -1264,14 +1465,17 @@ ziehen oder klicken">
 </div>
 
   <div class="license-strip">
-    © B. Dahms · Bildungscampus Leipzig ·  Nutzung unter <strong>CC BY-NC-SA 4.0</strong> · www.Bildungscampus-Leipzig.de
+    <div class="license-strip">
+  © B. Dahms · Bildungscampus Leipzig · Nutzung unter <strong>CC BY-NC-SA 4.0</strong> · www.Bildungscampus-Leipzig.de
+  · <span id="visitorCounter">Besucher: …</span>
+</div>
   </div>
 
 <div class="license-overlay" id="licenseOverlay" aria-hidden="true">
   <div class="license-dialog" role="dialog" aria-modal="true" aria-labelledby="licenseTitle">
     <h2 id="licenseTitle">Lizenz- und Nutzungshinweis</h2>
     <p><strong>Dieses Tool ist ein Projekt des Bildungscampus Leipzig.</strong></p>
-    <p>Sie dürfen den Generator kostenlos nutzen. Nicht erlaubt ist es, diesen Generator zu kopieren und/oder wesentliche Teile davon selbst gegen Geld anzubieten, als kostenpflichtigen Dienst bereitzustellen oder ohne Zustimmung desw Bildungscampus Leipzig kommerziell zu verwerten.</p>
+    <p>Sie dürfen den Generator kostenlos nutzen. Nicht erlaubt ist es, diesen Generator zu kopieren und/oder wesentliche Teile davon selbst gegen Geld anzubieten, als kostenpflichtigen Dienst bereitzustellen oder ohne Zustimmung des Bildungscampus Leipzig kommerziell zu verwerten.</p>
     <ul>
       <li>Namensnennung: Bildungscampus Leipzig</li>
       <li>Website: www.Bildungscampus-Leipzig.de</li>
@@ -1287,53 +1491,11 @@ ziehen oder klicken">
 
 <input type="file" id="jsonLoader" accept=".json,application/json" style="display:none">
 
-<div id="helpOverlay" onclick="toggleHelp()"></div>
+<div id="helpOverlay" onclick="closeInfoPanel()"></div>
 
-<aside id="helpSidebar" aria-label="Kurzanleitung">
-  <button class="help-close" onclick="toggleHelp()" type="button" aria-label="Anleitung schließen">×</button>
-  <h2>Kurzanleitung</h2>
-  <p>Mit diesem Generator erstellen Sie eine komplette Bewerbungsmappe als PDF und können Ihr Projekt zwischenspeichern.</p>
-
-  <h3>1. Persönliche Daten eingeben</h3>
-  <ul>
-    <li>Name, Kontaktdaten und Personendaten ausfüllen.</li>
-    <li>Optional zusätzliche Bilder und Links ergänzen.</li>
-  </ul>
-
-  <h3>2. Deckblatt gestalten</h3>
-  <ul>
-    <li>Ein Profilfoto hochladen.</li>
-    <li>Das Foto per Ziehen und Zoom frei auf dem Deckblatt platzieren.</li>
-  </ul>
-
-  <h3>3. Werdegang und Ausbildung erfassen</h3>
-  <ul>
-    <li>Für jede Station einen eigenen Eintrag anlegen.</li>
-    <li>Tätigkeiten oder Inhalte zeilenweise oder mit Semikolon getrennt eingeben.</li>
-    <li>Im Werdegang kann pro Eintrag ein Logo oder Bild mit Link eingefügt werden.</li>
-  </ul>
-
-  <h3>4. Vorschau nutzen</h3>
-  <ul>
-    <li>Rechts wird eine PDF-Vorschau angezeigt.</li>
-    <li>Bei vielen Inhalten erzeugt der Generator automatisch Folgeseiten.</li>
-  </ul>
-
-  <h3>5. Projekt speichern / laden</h3>
-  <p>Sie können Ihre Eingaben als <strong>JSON-Datei</strong> speichern und später wieder laden.</p>
-  <div class="help-note">
-    <strong>Was ist eine JSON-Datei?</strong><br>
-    Eine JSON-Datei ist eine einfache Textdatei, in der nur Ihre eingegebenen Daten strukturiert gespeichert werden.<br><br>
-    <strong>Wichtig:</strong> Diese Datei ist <strong>ungefährlich</strong>. Sie enthält keine Programme, keine Makros und keine ausführbaren Inhalte. Wenn man sie mit einem Editor öffnet, sieht man nur Text und Datenfelder.
-  </div>
-
-  <h3>6. PDF erstellen</h3>
-  <ul>
-    <li>Zum Schluss auf <strong>PDF SPEICHERN</strong> klicken.</li>
-    <li>Die fertige Bewerbungsmappe wird lokal im Browser erzeugt.</li>
-  </ul>
-<br><br>
-  <p class="hint" style="margin-top:16px;"></p>
+<aside id="helpSidebar" aria-label="Informationsbereich">
+  <button class="help-close" onclick="closeInfoPanel()" type="button" aria-label="Informationsbereich schließen">×</button>
+  <div id="helpContent"></div>
 </aside>
 
 <script>
@@ -1500,7 +1662,12 @@ function normalizeOnBlur(el){
   if (id === "geburtsdatum") el.value = normalizeGermanDate(el.value);
   if (id === "email") el.value = normalizeEmail(el.value);
   if (id === "telefon") el.value = normalizePhone(el.value);
-  if (cls.includes("w-zeit") || cls.includes("a-zeit")) el.value = normalizePeriod(el.value);
+if (
+    cls.includes("w-zeit") ||
+    cls.includes("a-zeit") ||
+    cls.includes("f-zeit") ||
+    cls.includes("s-zeit")
+  ) el.value = normalizePeriod(el.value);
 
   scheduleSave();
   updateNonEuVisibility();
@@ -2122,10 +2289,10 @@ function getState(){
         zeit: e.querySelector(".a-zeit")?.value || "",
         inst: e.querySelector(".a-institution")?.value || "",
         abschluss: e.querySelector(".a-abschluss")?.value || "",
-        details: e.querySelector(".a-details")?.value || ""
-      })),
-      aImgUrls: Array.from(document.querySelectorAll(".a-img-url")).map(i => i.value || ""),
-      aImageRefs: Array.from(document.querySelectorAll(".a-img")).map(collectImageRefFromInput)
+        details: e.querySelector(".a-details")?.value || "",
+        link: e.querySelector(".a-link")?.value || "",
+        imageRef: collectImageRefFromInput(e.querySelector('.a-img'))
+      }))
     },
     fortbildung: {
       entries: Array.from(document.querySelectorAll('.fortbildung-entry')).map(e => ({
@@ -2325,7 +2492,10 @@ async function applyStateToForm(state){
 
   if (state.ausbildung && Array.isArray(state.ausbildung.entries)){
     const list = document.getElementById("ausbildung-liste");
-    const entries = state.ausbildung.entries.length ? state.ausbildung.entries : [{zeit:"", inst:"", abschluss:"", details:""}];
+    const entries = state.ausbildung.entries.length
+      ? state.ausbildung.entries
+      : [{zeit:"", inst:"", abschluss:"", details:"", link:"", imageRef:""}];
+
     for (const ent of entries) {
       const div = document.createElement("div");
       div.className = "ausbildung-entry";
@@ -2334,13 +2504,20 @@ async function applyStateToForm(state){
         <input type="text" class="a-institution" placeholder="Schule / Hochschule / Institution" value="${escapeHtml(ent.inst)}">
         <input type="text" class="a-abschluss" placeholder="Abschluss / Studiengang" value="${escapeHtml(ent.abschluss)}">
         <textarea class="a-details" placeholder="Schwerpunkte / Inhalte (jede Zeile oder ; = ein Punkt)" rows="2">${escapeHtml(ent.details)}</textarea>
+        <div class="w-media">
+          <div>
+            <label>Logo / Bild (optional)</label>
+            <input type="file" class="a-img" accept="image/*">
+          </div>
+          <div>
+            <label>Link zum Eintrag / Institution (optional)</label>
+            <input type="url" class="a-link" placeholder="https://..." value="${escapeHtml(ent.link || "")}">
+          </div>
+        </div>
       `;
       list.appendChild(div);
+      await restoreFileInputImageRef(div.querySelector('.a-img'), ent.imageRef || '');
     }
-    const aUrls = Array.from(document.querySelectorAll(".a-img-url"));
-    (state.ausbildung.aImgUrls || []).forEach((v, idx) => { if (aUrls[idx]) aUrls[idx].value = v; });
-    const aImgs = Array.from(document.querySelectorAll('.a-img'));
-    for (const [idx, ref] of (state.ausbildung.aImageRefs || []).entries()) { if (aImgs[idx]) await restoreFileInputImageRef(aImgs[idx], ref); }
   }
 
   {
@@ -2512,18 +2689,34 @@ function addWerdegang() {
   scheduleSave();
 }
 
-function addAusbildung() {
+async function addAusbildung(data, doSave = true) {
+  const ent = data || {};
   const div = document.createElement('div');
   div.className = 'ausbildung-entry';
   div.innerHTML = `
-    <input type="text" class="a-zeit" placeholder="Zeitraum (z. B. 2012–2015)">
-    <input type="text" class="a-institution" placeholder="Schule / Hochschule / Institution">
-    <input type="text" class="a-abschluss" placeholder="Abschluss / Studiengang">
-    <textarea class="a-details" placeholder="Schwerpunkte / Inhalte (jede Zeile oder ; = ein Punkt)" rows="2"></textarea>
+    <input type="text" class="a-zeit" placeholder="Zeitraum (z. B. 2012–2015)" value="${escapeHtml(ent.zeit || '')}">
+    <input type="text" class="a-institution" placeholder="Schule / Hochschule / Institution" value="${escapeHtml(ent.inst || '')}">
+    <input type="text" class="a-abschluss" placeholder="Abschluss / Studiengang" value="${escapeHtml(ent.abschluss || '')}">
+    <textarea class="a-details" placeholder="Schwerpunkte / Inhalte (jede Zeile oder ; = ein Punkt)" rows="2">${escapeHtml(ent.details || '')}</textarea>
+    <div class="w-media">
+      <div>
+        <label>Logo / Bild (optional)</label>
+        <input type="file" class="a-img" accept="image/*">
+      </div>
+      <div>
+        <label>Link zum Eintrag / Institution (optional)</label>
+        <input type="url" class="a-link" placeholder="https://..." value="${escapeHtml(ent.link || '')}">
+      </div>
+    </div>
   `;
   document.getElementById('ausbildung-liste').appendChild(div);
+
+  const imgInput = div.querySelector('.a-img');
+  await restoreFileInputImageRef(imgInput, ent.imageRef || '');
   initImageInputEnhancements(div);
-  scheduleSave();
+  updateDropzoneState(imgInput, !!(ent.imageRef || imgInput?.dataset?.dataUrl));
+
+  if (doSave) scheduleSave();
 }
 
 async function addFortbildung(data, doSave = true) {
@@ -2940,6 +3133,7 @@ async function buildPdfDoc(){
     sizeName: 26,
     sizeSection: 22,
     sizeSub: 13,
+    sizeBody13: 13,
     sizeBody12: 12,
     sizeBody11: 11,
     sizeSmall9: 9,
@@ -3341,7 +3535,7 @@ async function buildPdfDoc(){
     }
   );
 
-  // --- Seite 3: Werdegang ---
+   // --- Seite 3: Werdegang ---
   doc.addPage('l');
   drawChromeLandscape();
   drawSectionTitle("Beruflicher Werdegang", LAYOUT.marginLeft, 48);
@@ -3349,13 +3543,13 @@ async function buildPdfDoc(){
   let wy = LAYOUT.contentStartY;
   const werdegangTitleX = LAYOUT.marginLeft + 8;
   const werdegangBulletX = LAYOUT.marginLeft + 8;
-  const werdegangImageX = 230;
+  const werdegangImageX = 214;
   const werdegangTextWidth = 160;
   const werdegangBulletWidth = 172;
   const lineH = LAYOUT.lineHeightBullets;
   const werdegangBottomY = 188;
-  const werdegangImageMaxW = 45;
-  const werdegangImageMaxH = 24;
+  const werdegangImageMaxW = 52;
+  const werdegangImageMaxH = 36;
 
   const applyWerdegangEntryStyle = () => {
     doc.setFont(LAYOUT.fontFamily, "bold");
@@ -3440,7 +3634,7 @@ async function buildPdfDoc(){
         wy + 1,
         werdegangImageMaxW,
         werdegangImageMaxH,
-        { align: "right", vAlign: "middle" }
+        { align: "center", vAlign: "middle" }
       );
       addUrlLinkOnRect(doc, box.x, box.y, box.w, box.h, (wLinkInput ? wLinkInput.value : ""));
     }
@@ -3454,50 +3648,126 @@ async function buildPdfDoc(){
   drawSectionTitle("Ausbildung & Studium", LAYOUT.marginLeft, 48);
 
   let ay = LAYOUT.contentStartY;
-  document.querySelectorAll('.ausbildung-entry').forEach(e => {
+  const ausbildungTitleX = LAYOUT.marginLeft;
+  const ausbildungBulletX = LAYOUT.marginLeft;
+  const ausbildungImageX = 214;
+  const ausbildungTextWidth = 165;
+  const ausbildungBulletWidth = 172;
+  const ausbildungBottomY = 188;
+  const ausbildungImageMaxW = 52;
+  const ausbildungImageMaxH = 36;
+
+  const applyAusbildungEntryStyle = () => {
+    doc.setFont(LAYOUT.fontFamily, "bold");
     doc.setFontSize(12);
     doc.setTextColor(...LAYOUT.brandColorRgb);
-    doc.setFont(LAYOUT.fontFamily, "bold");
-    doc.text(`${e.querySelector('.a-zeit').value} | ${e.querySelector('.a-institution').value}`, LAYOUT.marginLeft, ay);
+  };
+
+  const addAusbildungPage = (isContinuation = false) => {
+    doc.addPage('l');
+    drawChromeLandscape();
+    drawSectionTitle(isContinuation ? "Ausbildung & Studium (Fortsetzung)" : "Ausbildung & Studium", LAYOUT.marginLeft, 48);
+    ay = LAYOUT.contentStartY;
+    applyAusbildungEntryStyle();
+  };
+
+  const ausbildungEntries = Array.from(document.querySelectorAll('.ausbildung-entry'));
+  for (let idx = 0; idx < ausbildungEntries.length; idx++) {
+    const e = ausbildungEntries[idx];
+    const zeitraum = (e.querySelector('.a-zeit')?.value || "").trim();
+    const institution = (e.querySelector('.a-institution')?.value || "").trim();
+    const abschluss = (e.querySelector('.a-abschluss')?.value || "").trim();
+    const details = (e.querySelector('.a-details')?.value || "").trim();
+    const link = (e.querySelector('.a-link')?.value || "").trim();
+    const aImage = await processImage(e.querySelector('.a-img'));
+
+    const title = [zeitraum, institution].filter(Boolean).join(" | ") || " ";
+    const items = splitTasksToBullets(details);
+
+    applyAusbildungEntryStyle();
+    const titleLines = doc.splitTextToSize(title, ausbildungTextWidth);
+
+    let textHeight = titleLines.length * 6 + 2;
+
+    if (abschluss) {
+      textHeight += 7;
+    }
+
+    if (items.length === 0) {
+      textHeight += LAYOUT.lineHeightBullets;
+    } else {
+      for (const it of items) {
+        const lines = doc.splitTextToSize("– " + it, ausbildungBulletWidth);
+        textHeight += lines.length * LAYOUT.lineHeightBullets + LAYOUT.bulletExtraGap;
+      }
+    }
+
+    let imageHeight = 0;
+    if (aImage) {
+      const ratio = aImage.w / aImage.h;
+      let drawW = ausbildungImageMaxW;
+      let drawH = drawW / ratio;
+      if (drawH > ausbildungImageMaxH) {
+        drawH = ausbildungImageMaxH;
+        drawW = drawH * ratio;
+      }
+      imageHeight = drawH;
+    }
+
+    const neededHeight = Math.max(textHeight, imageHeight) + LAYOUT.entryGapAfter;
+
+    if (ay + neededHeight > ausbildungBottomY) {
+      addAusbildungPage(idx > 0);
+      applyAusbildungEntryStyle();
+    }
+
+    doc.text(titleLines, ausbildungTitleX, ay);
 
     doc.setTextColor(...LAYOUT.textColorRgb);
     doc.setFont(LAYOUT.fontFamily, "normal");
     doc.setFontSize(LAYOUT.sizeBody11);
 
-    const abschluss = (e.querySelector('.a-abschluss').value || "").trim();
+    let bulletY = ay + (titleLines.length * 6) + 1;
+
     if (abschluss) {
-      doc.text("Abschluss: " + abschluss, LAYOUT.marginLeft, ay + 7);
-      ay += 7;
+      doc.text("Abschluss: " + abschluss, ausbildungBulletX, bulletY);
+      bulletY += 7;
     }
 
-    const items = splitTasksToBullets(e.querySelector('.a-details').value);
-    let bulletY = ay + 7;
-    for (const it of items) {
-      const lines = doc.splitTextToSize("– " + it, 180);
-      doc.text(lines, LAYOUT.marginLeft, bulletY);
-      bulletY += lines.length * LAYOUT.lineHeightBullets + LAYOUT.bulletExtraGap;
+    if (items.length === 0) {
+      bulletY += LAYOUT.lineHeightBullets;
+    } else {
+      for (const it of items) {
+        const lines = doc.splitTextToSize("– " + it, ausbildungBulletWidth);
+        doc.text(lines, ausbildungBulletX, bulletY);
+        bulletY += lines.length * LAYOUT.lineHeightBullets + LAYOUT.bulletExtraGap;
+      }
     }
-    ay = bulletY + LAYOUT.entryGapAfter;
-  });
 
-  await drawImageStackWithLinks(
-    doc,
-    document.querySelectorAll('.a-img'),
-    document.querySelectorAll('.a-img-url'),
-    48,
-    {
-      x: 224,
-      maxW: 67,
-      maxH: 60,
-      gap: 6
+    if (aImage) {
+      const box = drawProportionalImage(
+        doc,
+        aImage,
+        ausbildungImageX,
+        ay - 1,
+        ausbildungImageMaxW,
+        ausbildungImageMaxH,
+        { align: "center", vAlign: "middle" }
+      );
+      addUrlLinkOnRect(doc, box.x, box.y, box.w, box.h, link);
     }
-  );
 
-  // --- Seite 5: Fort- & Weiterbildungen ---
+    ay += neededHeight;
+  }
+
+    // --- Seite 5: Fort- & Weiterbildungen ---
   doc.addPage('l');
   drawChromeLandscape();
   drawSectionTitle("Fort- & Weiterbildungen", LAYOUT.marginLeft, 48);
   let fy = 68;
+  const fortImageX = 214;
+  const fortImageMaxW = 52;
+  const fortImageMaxH = 36;
   const fortEntries = Array.from(document.querySelectorAll('.fortbildung-entry'));
   for (const e of fortEntries) {
     const zeit = (e.querySelector('.f-zeit')?.value || '').trim();
@@ -3507,7 +3777,12 @@ async function buildPdfDoc(){
     const hasText = zeit || titel || details;
     const img = await processImage(e.querySelector('.f-img'));
     if (!hasText && !img) continue;
-    if (fy > 170) { doc.addPage('l'); drawChromeLandscape(); drawSectionTitle('Fort- & Weiterbildungen (Fortsetzung)', LAYOUT.marginLeft, 48); fy = 68; }
+    if (fy > 170) {
+      doc.addPage('l');
+      drawChromeLandscape();
+      drawSectionTitle('Fort- & Weiterbildungen (Fortsetzung)', LAYOUT.marginLeft, 48);
+      fy = 68;
+    }
     doc.setFont(LAYOUT.fontFamily, 'bold');
     doc.setFontSize(LAYOUT.sizeBody13);
     doc.setTextColor(...LAYOUT.textColorRgb);
@@ -3521,7 +3796,15 @@ async function buildPdfDoc(){
     doc.text(textLines, LAYOUT.marginLeft, fy + (titel ? 7 : 0));
     let blockH = Math.max(18, (textLines.length * 5) + (titel ? 7 : 0));
     if (img){
-      const box = drawProportionalImage(doc, img, 214, fy - 5, 60, 45, { align: 'center', vAlign: 'middle' });
+      const box = drawProportionalImage(
+        doc,
+        img,
+        fortImageX,
+        fy - 1,
+        fortImageMaxW,
+        fortImageMaxH,
+        { align: 'center', vAlign: 'middle' }
+      );
       addUrlLinkOnRect(doc, box.x, box.y, box.w, box.h, link);
       blockH = Math.max(blockH, box.h + 4);
     }
@@ -3533,6 +3816,9 @@ async function buildPdfDoc(){
   drawChromeLandscape();
   drawSectionTitle("Schulbildung", LAYOUT.marginLeft, 48);
   let sy = 68;
+  const schoolImageX = 214;
+  const schoolImageMaxW = 52;
+  const schoolImageMaxH = 36;
   const schoolEntries = Array.from(document.querySelectorAll('.schulbildung-entry'));
   for (const e of schoolEntries) {
     const zeit = (e.querySelector('.s-zeit')?.value || '').trim();
@@ -3543,7 +3829,12 @@ async function buildPdfDoc(){
     const hasText = zeit || schule || abschluss || details;
     const img = await processImage(e.querySelector('.s-img'));
     if (!hasText && !img) continue;
-    if (sy > 170) { doc.addPage('l'); drawChromeLandscape(); drawSectionTitle('Schulbildung (Fortsetzung)', LAYOUT.marginLeft, 48); sy = 68; }
+    if (sy > 170) {
+      doc.addPage('l');
+      drawChromeLandscape();
+      drawSectionTitle('Schulbildung (Fortsetzung)', LAYOUT.marginLeft, 48);
+      sy = 68;
+    }
     doc.setFont(LAYOUT.fontFamily, 'bold');
     doc.setFontSize(LAYOUT.sizeBody13);
     doc.setTextColor(...LAYOUT.textColorRgb);
@@ -3558,7 +3849,15 @@ async function buildPdfDoc(){
     doc.text(textLines, LAYOUT.marginLeft, sy + (schule ? 7 : 0));
     let blockH = Math.max(18, (textLines.length * 5) + (schule ? 7 : 0));
     if (img){
-      const box = drawProportionalImage(doc, img, 214, sy - 5, 60, 45, { align: 'center', vAlign: 'middle' });
+      const box = drawProportionalImage(
+        doc,
+        img,
+        schoolImageX,
+        sy - 1,
+        schoolImageMaxW,
+        schoolImageMaxH,
+        { align: 'center', vAlign: 'middle' }
+      );
       addUrlLinkOnRect(doc, box.x, box.y, box.w, box.h, link);
       blockH = Math.max(blockH, box.h + 4);
     }
@@ -4224,15 +4523,251 @@ Optimiert: ${originalSize} → ${optimizedSize}`;
 
   applyTransform();
 }
+function showDonationCopyHint(message, ok = true){
+  const hint = document.getElementById("donationCopyHint");
+  if (!hint) return;
 
+  hint.textContent = message;
+  hint.style.display = "block";
+  hint.style.color = ok ? "#2e7d32" : "#b26a00";
 
-function toggleHelp(){
+  clearTimeout(window.__donationCopyHintTimer);
+  window.__donationCopyHintTimer = setTimeout(() => {
+    hint.style.display = "none";
+  }, 2600);
+}
+
+function selectDonationIbanText(){
+  const el = document.getElementById("donationIbanText");
+  if (!el) return;
+
+  const range = document.createRange();
+  range.selectNodeContents(el);
+
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+async function copyDonationIban(){
+  const iban = "DE82 5451 0067 0968 4786 75";
+
+  try{
+    if (navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(iban);
+      showDonationCopyHint("IBAN wurde in die Zwischenablage kopiert.", true);
+      return;
+    }
+  }catch(err){
+    console.warn("Clipboard API nicht verfügbar:", err);
+  }
+
+  try{
+    const temp = document.createElement("textarea");
+    temp.value = iban;
+    temp.setAttribute("readonly", "");
+    temp.style.position = "fixed";
+    temp.style.top = "-1000px";
+    temp.style.left = "-1000px";
+    temp.style.opacity = "0";
+    document.body.appendChild(temp);
+
+    temp.focus();
+    temp.select();
+    temp.setSelectionRange(0, temp.value.length);
+
+    const ok = document.execCommand("copy");
+    document.body.removeChild(temp);
+
+    if (ok){
+      showDonationCopyHint("IBAN wurde in die Zwischenablage kopiert.", true);
+      return;
+    }
+  }catch(err){
+    console.warn("execCommand-Kopie fehlgeschlagen:", err);
+  }
+
+  selectDonationIbanText();
+  showDonationCopyHint("Automatisches Kopieren nicht möglich – IBAN ist markiert.", false);
+}
+
+const INFO_PANEL_CONTENT = {
+  guide: `
+    <h2>Kurzanleitung</h2>
+    <p>Mit diesem Generator erstellen Sie eine komplette Bewerbungsmappe als PDF und können Ihr Projekt zwischenspeichern.</p>
+
+    <h3>1. Persönliche Daten eingeben</h3>
+    <ul>
+      <li>Name, Kontaktdaten und Personendaten ausfüllen.</li>
+      <li>Optional zusätzliche Bilder und Links ergänzen.</li>
+    </ul>
+
+    <h3>2. Deckblatt gestalten</h3>
+    <ul>
+      <li>Ein Profilfoto hochladen.</li>
+      <li>Das Foto per Ziehen und Zoom frei auf dem Deckblatt platzieren.</li>
+    </ul>
+
+    <h3>3. Werdegang und Ausbildung erfassen</h3>
+    <ul>
+      <li>Für jede Station einen eigenen Eintrag anlegen.</li>
+      <li>Tätigkeiten oder Inhalte zeilenweise oder mit Semikolon getrennt eingeben.</li>
+      <li>Im Werdegang kann pro Eintrag ein Logo oder Bild mit Link eingefügt werden.</li>
+    </ul>
+
+    <h3>4. Vorschau nutzen</h3>
+    <ul>
+      <li>Rechts wird eine PDF-Vorschau angezeigt.</li>
+      <li>Bei vielen Inhalten erzeugt der Generator automatisch Folgeseiten.</li>
+    </ul>
+
+    <h3>5. Projekt speichern / laden</h3>
+    <p>Sie können Ihre Eingaben als <strong>JSON-Datei</strong> speichern und später wieder laden.</p>
+    <div class="help-note">
+      <strong>Was ist eine JSON-Datei?</strong><br>
+      Eine JSON-Datei ist eine einfache Textdatei, in der nur Ihre eingegebenen Daten strukturiert gespeichert werden.<br><br>
+      <strong>Wichtig:</strong> Diese Datei ist <strong>ungefährlich</strong>. Sie enthält keine Programme, keine Makros und keine ausführbaren Inhalte. Wenn man sie mit einem Editor öffnet, sieht man nur Text und Datenfelder.
+    </div>
+
+    <h3>6. PDF erstellen</h3>
+    <ul>
+      <li>Zum Schluss auf <strong>PDF SPEICHERN</strong> klicken.</li>
+      <li>Die fertige Bewerbungsmappe wird lokal im Browser erzeugt.</li>
+    </ul>
+  `,
+
+  save: `
+    <h2>Projekt speichern</h2>
+    <p>Mit dieser Funktion speichern Sie den aktuellen Stand Ihres Projekts als <strong>JSON-Datei</strong>.</p>
+
+    <h3>Was wird gespeichert?</h3>
+    <ul>
+      <li>Ihre eingegebenen Texte</li>
+      <li>die gewählten Einstellungen</li>
+      <li>die Positionen der Bilder</li>
+      <li>eingebettete Bilddaten für das spätere Wiederladen</li>
+    </ul>
+
+    <div class="help-note">
+      <strong>Hinweis:</strong><br>
+      Die JSON-Datei dient nur zum späteren Weiterarbeiten im Generator. Sie ist keine fertige Bewerbungsmappe und ersetzt nicht das PDF.
+    </div>
+
+    <p style="margin-top:16px;">
+      <button class="btn-secondary" onclick="saveProject()" type="button">Jetzt Projekt speichern</button>
+    </p>
+  `,
+
+  load: `
+    <h2>Projekt laden</h2>
+    <p>Mit dieser Funktion können Sie einen früher gespeicherten Projektstand wieder in den Generator laden.</p>
+
+    <h3>Wichtig beim Laden</h3>
+    <ul>
+      <li>Es muss eine passende JSON-Datei aus diesem Generator sein.</li>
+      <li>Beim Laden werden die aktuellen Formulardaten überschrieben.</li>
+      <li>Danach stehen die Inhalte wieder zur Bearbeitung bereit.</li>
+    </ul>
+
+    <div class="help-note">
+      <strong>Hinweis:</strong><br>
+      Wenn die Datei verändert wurde oder nicht aus diesem Generator stammt, erscheint ein Warnhinweis.
+    </div>
+
+    <p style="margin-top:16px;">
+      <button class="btn-secondary" onclick="loadProject()" type="button">Jetzt Projekt laden</button>
+    </p>
+  `,
+
+  preview: `
+    <h2>Vorschau aktualisieren</h2>
+    <p>Die Vorschau erzeugt rechts im Browser eine PDF-Ansicht auf Basis Ihrer aktuellen Eingaben.</p>
+
+    <h3>Wofür ist die Vorschau gedacht?</h3>
+    <ul>
+      <li>zur schnellen Kontrolle des Layouts</li>
+      <li>zur Prüfung von Textumbrüchen und Bildpositionen</li>
+      <li>zur Sichtprüfung vor dem finalen PDF-Export</li>
+    </ul>
+
+    <div class="help-note">
+      <strong>Hinweis:</strong><br>
+      Die Vorschau ist eine Browseransicht. Für die endgültige Datei weiterhin bitte <strong>PDF SPEICHERN</strong> verwenden.
+    </div>
+
+    <p style="margin-top:16px;">
+      <button class="btn-secondary" onclick="refreshPreview()" type="button">Jetzt Vorschau aktualisieren</button>
+    </p>
+  `,
+
+  reset: `
+    <h2>Zurücksetzen</h2>
+    <p>Mit dieser Funktion werden alle aktuellen Eingaben gelöscht und der Generator auf den Ausgangszustand zurückgesetzt.</p>
+
+    <h3>Was wird gelöscht?</h3>
+    <ul>
+      <li>Formularinhalte</li>
+      <li>hochgeladene Bilder</li>
+      <li>Zwischenspeicher im Browser</li>
+      <li>Positionen und Einstellungen des aktuellen Projekts</li>
+    </ul>
+
+    <div class="help-note">
+      <strong>Achtung:</strong><br>
+      Dieser Schritt sollte nur ausgeführt werden, wenn der Projektstand vorher gespeichert wurde oder wirklich nicht mehr benötigt wird.
+    </div>
+
+    <p style="margin-top:16px;">
+      <button class="btn-secondary" onclick="resetAll()" type="button">Jetzt alles zurücksetzen</button>
+    </p>
+  `
+};
+
+function openInfoPanel(key = 'guide'){
+  const sidebar = document.getElementById("helpSidebar");
+  const overlay = document.getElementById("helpOverlay");
+  const content = document.getElementById("helpContent");
+  if (!sidebar || !overlay || !content) return;
+
+  content.innerHTML = INFO_PANEL_CONTENT[key] || INFO_PANEL_CONTENT.guide;
+  sidebar.classList.add("open");
+  overlay.classList.add("open");
+}
+
+function closeInfoPanel(){
   const sidebar = document.getElementById("helpSidebar");
   const overlay = document.getElementById("helpOverlay");
   if (!sidebar || !overlay) return;
-  sidebar.classList.toggle("open");
-  overlay.classList.toggle("open");
+  sidebar.classList.remove("open");
+  overlay.classList.remove("open");
 }
+
+function toggleHelp(){
+  const sidebar = document.getElementById("helpSidebar");
+  if (sidebar?.classList.contains("open")){
+    closeInfoPanel();
+  } else {
+    openInfoPanel("guide");
+  }
+}
+
+function toggleFloatingTools(forceOpen){
+  const panel = document.getElementById("floatingTools");
+  const backdrop = document.getElementById("floatingToolsBackdrop");
+  if (!panel || !backdrop) return;
+
+  const isOpen = panel.classList.contains("open");
+  const nextState = (typeof forceOpen === "boolean") ? forceOpen : !isOpen;
+
+  panel.classList.toggle("open", nextState);
+  backdrop.classList.toggle("open", nextState);
+}
+
+document.addEventListener("keydown", (ev) => {
+  if (ev.key === "Escape"){
+    toggleFloatingTools(false);
+  }
+});
 
 function sanitizeImportedState(raw){
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Ungültige Projektdatei");
@@ -4267,20 +4802,52 @@ function loadProject(){
   input.value = "";
   input.click();
 }
+async function initVisitorCounter(){
+  const el = document.getElementById("visitorCounter");
+  if (!el) return;
 
+  try{
+    const res = await fetch("https://counterapi.com/api/bildungscampus-leipzig/view/bewerbungsgenerator", {
+      cache: "no-store"
+    });
+    if (!res.ok) throw new Error("Counter nicht erreichbar");
+
+    const data = await res.json();
+    el.textContent = "Besucher: " + Number(data.value || 0).toLocaleString("de-DE");
+  }catch(err){
+    console.error("Besucherzähler-Fehler:", err);
+    el.textContent = "Besucher: –";
+  }
+}
 
 /* =========================================================
    INIT
 ========================================================== */
+
 window.addEventListener("DOMContentLoaded", async () => {
   installBasicSourceProtection();
   initLicenseDialog();
   ensureLicenseAccepted();
+  initVisitorCounter();
+
   document.addEventListener("blur", (ev) => {
     const t = ev.target;
     if (!t) return;
-    if (t.id === "geburtsdatum" || t.id === "email" || t.id === "telefon" ||
-        (typeof t.className === "string" && (t.className.includes("w-zeit") || t.className.includes("a-zeit")))) {
+
+    if (
+      t.id === "geburtsdatum" ||
+      t.id === "email" ||
+      t.id === "telefon" ||
+      (
+        typeof t.className === "string" &&
+        (
+          t.className.includes("w-zeit") ||
+          t.className.includes("a-zeit") ||
+          t.className.includes("f-zeit") ||
+          t.className.includes("s-zeit")
+        )
+      )
+    ) {
       normalizeOnBlur(t);
     }
   }, true);
@@ -4306,7 +4873,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
   }, true);
 
-  document.getElementById('herkunft')?.addEventListener('change', () => { updateNonEuVisibility(); scheduleSave(); });
+  document.getElementById('herkunft')?.addEventListener('change', () => {
+    updateNonEuVisibility();
+    scheduleSave();
+  });
 
   document.getElementById("jsonLoader")?.addEventListener("change", async (ev) => {
     const file = ev.target.files && ev.target.files[0];
@@ -4353,14 +4923,40 @@ window.addEventListener("DOMContentLoaded", async () => {
   const pScaleVal = document.getElementById("personImgScaleVal");
   if (pScale && pScaleVal){
     const upd = () => { pScaleVal.textContent = `${pScale.value}%`; };
-    pScale.addEventListener("input", () => { upd(); scheduleSave(); });
+    pScale.addEventListener("input", () => {
+      upd();
+      scheduleSave();
+    });
     upd();
   }
 
   scheduleSave();
   requestPreviewRefresh(100);
-
 });
 </script>
+
+<button type="button" class="floating-tools-toggle" onclick="toggleFloatingTools()" aria-label="Werkzeugmenü öffnen">
+  <span class="floating-tools-icon">☰</span>
+  <span class="floating-tools-label">M<br>e<br>n<br>ü</span>
+</button>
+
+<div class="floating-tools-backdrop" id="floatingToolsBackdrop" onclick="toggleFloatingTools(false)"></div>
+
+<div class="floating-tools-panel" id="floatingTools" aria-label="Werkzeugmenü">
+  <div class="floating-tools-head">
+    <div class="floating-tools-title">Schnellzugriff</div>
+    <button class="floating-tools-close" onclick="toggleFloatingTools(false)" type="button" aria-label="Werkzeugmenü schließen">×</button>
+  </div>
+
+  <div class="floating-tools-grid">
+    <button class="btn-secondary" onclick="saveProject(); toggleFloatingTools(false);" type="button">Projekt speichern</button>
+    <button class="btn-secondary" onclick="loadProject(); toggleFloatingTools(false);" type="button">Projekt laden</button>
+    <button class="btn-secondary" onclick="refreshPreview(); toggleFloatingTools(false);" type="button">Vorschau aktualisieren</button>
+    <button class="btn-secondary" onclick="toggleHelp(); toggleFloatingTools(false);" type="button">Anleitung</button>
+    <button class="btn-secondary" onclick="resetAll(); toggleFloatingTools(false);" type="button">Zurücksetzen</button>
+    <button class="btn-main" onclick="downloadPDF(); toggleFloatingTools(false);" type="button">PDF SPEICHERN</button>
+  </div>
+</div>
+
 </body>
 </html>
