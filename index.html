@@ -3477,7 +3477,64 @@ async function buildPdfDoc(){
     const info = doc.getCurrentPageInfo && doc.getCurrentPageInfo();
     return info ? info.pageNumber : 1;
   };
+  const getTotalPages = () => doc.getNumberOfPages();
 
+  function drawFooterNavigationLandscape(pageNo, totalPages){
+    const prevLabel = "<<";
+    const nextLabel = ">>";
+    const pageLabel = `Seite ${pageNo}`;
+
+    const y = LAYOUT.footerYLandscape;
+    const prevX = 258;
+    const pageX = 275;
+    const nextX = 289;
+
+    doc.setTextColor(LAYOUT.headerTextColor);
+    doc.setFont(LAYOUT.fontFamily, "normal");
+    doc.setFontSize(LAYOUT.sizeSmall8);
+
+    // Zurück-Button nur ab Seite 2
+    if (pageNo > 1){
+      doc.text(prevLabel, prevX, y);
+      doc.link(prevX, y - 6, doc.getTextWidth(prevLabel), 8, { pageNumber: pageNo - 1 });
+    }
+
+    // Seitenzahl
+    doc.text(pageLabel, pageX, y);
+
+    // Weiter-Button nur bis vorletzte Seite
+    if (pageNo < totalPages){
+      doc.text(nextLabel, nextX, y);
+      doc.link(nextX, y - 6, doc.getTextWidth(nextLabel), 8, { pageNumber: pageNo + 1 });
+    }
+  }
+
+  function drawFooterNavigationPortrait(pageNo, totalPages){
+    const prevLabel = "<<";
+    const nextLabel = ">>";
+    const pageLabel = `Seite ${pageNo}`;
+
+    const y = LAYOUT.footerYPortrait;
+    const prevX = 174;
+    const pageX = 190;
+    const nextX = 203;
+
+    doc.setTextColor(LAYOUT.headerTextColor);
+    doc.setFont(LAYOUT.fontFamily, "normal");
+    doc.setFontSize(7.5);
+
+    if (pageNo > 1){
+      doc.text(prevLabel, prevX, y);
+      doc.link(prevX, y - 6, doc.getTextWidth(prevLabel), 8, { pageNumber: pageNo - 1 });
+    }
+
+    doc.text(pageLabel, pageX, y);
+
+    if (pageNo < totalPages){
+      doc.text(nextLabel, nextX, y);
+      doc.link(nextX, y - 6, doc.getTextWidth(nextLabel), 8, { pageNumber: pageNo + 1 });
+    }
+  }
   function drawBadgeLandscape(){
     doc.setFillColor(255, 255, 255);
     doc.circle(14.8, 10.6, 7.0, 'F');
@@ -3581,7 +3638,7 @@ async function buildPdfDoc(){
     doc.setFontSize(6.5);
     doc.text(legalLine(), 98, LAYOUT.footerYLandscape);
     doc.setFontSize(LAYOUT.sizeSmall8);
-    doc.text(`Seite ${getPageNo()}`, 275, LAYOUT.footerYLandscape);
+    // Seitenzahl + Navigation wird am Ende für alle Seiten gesetzt
   };
 
   const drawChromePortrait = () => {
@@ -3607,7 +3664,7 @@ async function buildPdfDoc(){
     doc.setFontSize(5.6);
     doc.text(legalLine(), 70, LAYOUT.footerYPortrait);
     doc.setFontSize(7.5);
-    doc.text(`Seite ${getPageNo()}`, 190, LAYOUT.footerYPortrait);
+    // Seitenzahl + Navigation wird am Ende für alle Seiten gesetzt
   };
 
   function drawSectionTitle(title, x, y){
@@ -4409,7 +4466,26 @@ async function buildPdfDoc(){
 
     addUrlLinkOnRect(doc, x, y, fW, fH, fullUrl);
   }
+  // -------------------------------------------------
+  // Fußzeilen-Navigation nachträglich auf alle Seiten setzen
+  // -------------------------------------------------
+  const totalPages = getTotalPages();
 
+  for (let pageNo = 1; pageNo <= totalPages; pageNo++) {
+    doc.setPage(pageNo);
+
+    const pageInfo = doc.getCurrentPageInfo ? doc.getCurrentPageInfo() : null;
+    const orientation =
+      pageInfo?.pageContext?.mediaBox?.topRightX > pageInfo?.pageContext?.mediaBox?.topRightY
+        ? 'landscape'
+        : 'portrait';
+
+    if (orientation === 'portrait') {
+      drawFooterNavigationPortrait(pageNo, totalPages);
+    } else {
+      drawFooterNavigationLandscape(pageNo, totalPages);
+    }
+  }
   return doc;
 }
 
