@@ -1244,9 +1244,13 @@ ziehen oder klicken">
         <input id="badgePosY" type="hidden" value="0"/>
         <input id="badgeScalePct" type="hidden" value="100"/>
 
-        <p class="small" style="margin:10px 0 0 0;">
+                <p class="small" style="margin:10px 0 0 0;">
           Optional: Für den runden Kopf links oben kann ein eigenes Bild gewählt und im Kreis separat positioniert werden. Ohne eigenes Kopfbild wird automatisch das Deckblattbild verwendet.
         </p>
+      </div>
+
+      <div style="margin-top:14px; display:flex; justify-content:flex-end;">
+        <button class="btn-secondary" onclick="clearAllImages()" type="button">Bilder löschen</button>
       </div>
 
       <!-- Optional: kleiner Stage (nur Datei/Check) -->
@@ -1315,7 +1319,10 @@ ziehen oder klicken">
           <div class="w-media">
             <div>
               <label>Logo / Bild (optional)</label>
-              <input accept="image/*" class="w-img" type="file"/>
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <input accept="image/*" class="w-img" type="file"/>
+                <button class="btn-secondary" onclick="clearSingleImageInput(this.parentElement.querySelector('.w-img'))" type="button">Bild löschen</button>
+              </div>
             </div>
             <div>
               <label>Link zum Eintrag / Unternehmen (optional)</label>
@@ -1339,7 +1346,10 @@ ziehen oder klicken">
           <div class="w-media">
             <div>
               <label>Logo / Bild (optional)</label>
-              <input accept="image/*" class="a-img" type="file"/>
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <input accept="image/*" class="a-img" type="file"/>
+                <button class="btn-secondary" onclick="clearSingleImageInput(this.parentElement.querySelector('.a-img'))" type="button">Bild löschen</button>
+              </div>
             </div>
             <div>
               <label>Link zum Eintrag / Institution (optional)</label>
@@ -1869,6 +1879,189 @@ function clearFileInputSelection(fileInput){
   try{ fileInput.value = ''; }catch(_e){}
 }
 
+async function imageStoreDelete(key){
+  if (!key) return;
+  __imageCache.delete(key);
+  const db = await openImageDb();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(IMAGE_STORE_NAME, "readwrite");
+    tx.objectStore(IMAGE_STORE_NAME).delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error || new Error("Bild konnte nicht gelöscht werden"));
+    tx.onabort = () => reject(tx.error || new Error("Löschen des Bildes wurde abgebrochen"));
+  });
+}
+
+function clearImageInputMeta(fileInput){
+  if (!fileInput) return;
+  const root =
+    fileInput.closest('.werdegang-entry, .ausbildung-entry, .fortbildung-entry, .station-entry, .motivation-entry, .kompetenz-entry')
+    || fileInput.parentElement
+    || fileInput;
+  const meta = root.querySelector('.img-upload-meta');
+  if (meta) meta.remove();
+}
+
+async function clearSingleImageInput(fileInput){
+  if (!fileInput) return;
+
+  const oldRef = collectImageRefFromInput(fileInput);
+
+  clearFileInputSelection(fileInput);
+
+  try{ delete fileInput.dataset.imgRef; }catch(_e){}
+  try{ delete fileInput.dataset.dataUrl; }catch(_e){}
+
+  updateDropzoneState(fileInput, false);
+  clearImageInputMeta(fileInput);
+
+  if (oldRef){
+    try{ await imageStoreDelete(oldRef); }catch(_e){}
+  }
+
+  if (typeof refreshMotivationCropEditors === 'function'){
+    refreshMotivationCropEditors();
+  }
+
+  scheduleSave();
+  requestPreviewRefresh();
+}
+
+async function imageStoreDelete(key){
+  if (!key) return;
+  __imageCache.delete(key);
+  const db = await openImageDb();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(IMAGE_STORE_NAME, "readwrite");
+    tx.objectStore(IMAGE_STORE_NAME).delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error || new Error("Bild konnte nicht gelöscht werden"));
+    tx.onabort = () => reject(tx.error || new Error("Löschen des Bildes wurde abgebrochen"));
+  });
+}
+
+async function clearSingleImageInput(fileInput){
+  if (!fileInput) return;
+
+  const oldRef = collectImageRefFromInput(fileInput);
+
+  clearFileInputSelection(fileInput);
+
+  try{ delete fileInput.dataset.imgRef; }catch(_e){}
+  try{ delete fileInput.dataset.dataUrl; }catch(_e){}
+
+  updateDropzoneState(fileInput, false);
+
+  const entry = fileInput.closest('.werdegang-entry, .ausbildung-entry');
+  if (entry){
+    const meta = entry.querySelector('.img-upload-meta');
+    if (meta) meta.remove();
+  }
+
+  if (oldRef){
+    try{ await imageStoreDelete(oldRef); }catch(_e){}
+  }
+
+  scheduleSave();
+  requestPreviewRefresh();
+}
+
+async function imageStoreDelete(key){
+  if (!key) return;
+  __imageCache.delete(key);
+  const db = await openImageDb();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(IMAGE_STORE_NAME, "readwrite");
+    tx.objectStore(IMAGE_STORE_NAME).delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error || new Error("Bild konnte nicht gelöscht werden"));
+    tx.onabort = () => reject(tx.error || new Error("Löschen des Bildes wurde abgebrochen"));
+  });
+}
+
+function clearImageInputMeta(fileInput){
+  if (!fileInput) return;
+  const meta = fileInput.parentElement?.querySelector('.img-upload-meta')
+    || fileInput.parentElement?.parentElement?.querySelector('.img-upload-meta');
+  if (meta) meta.remove();
+}
+
+async function clearSingleImageInput(fileInput){
+  if (!fileInput) return;
+
+  if (fileInput.id === 'imgFile' && typeof window.__BCL_COVER_CLEAR__ === 'function'){
+    await window.__BCL_COVER_CLEAR__();
+    scheduleSave();
+    requestPreviewRefresh();
+    return;
+  }
+
+  if (fileInput.id === 'badgeImgFile' && typeof window.__BCL_BADGE_CLEAR__ === 'function'){
+    await window.__BCL_BADGE_CLEAR__();
+    scheduleSave();
+    requestPreviewRefresh();
+    return;
+  }
+
+  const oldRef = collectImageRefFromInput(fileInput);
+
+  clearFileInputSelection(fileInput);
+
+  try{ delete fileInput.dataset.imgRef; }catch(_e){}
+  try{ delete fileInput.dataset.dataUrl; }catch(_e){}
+
+  updateDropzoneState(fileInput, false);
+  clearImageInputMeta(fileInput);
+
+  if (oldRef){
+    try{ await imageStoreDelete(oldRef); }catch(_e){}
+  }
+
+  if (typeof refreshMotivationCropEditors === 'function'){
+    refreshMotivationCropEditors();
+  }
+
+  scheduleSave();
+  requestPreviewRefresh();
+}
+
+async function imageStoreDelete(key){
+  if (!key) return;
+  __imageCache.delete(key);
+  const db = await openImageDb();
+  return await new Promise((resolve, reject) => {
+    const tx = db.transaction(IMAGE_STORE_NAME, "readwrite");
+    tx.objectStore(IMAGE_STORE_NAME).delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error || new Error("Bild konnte nicht gelöscht werden"));
+    tx.onabort = () => reject(tx.error || new Error("Löschen des Bildes wurde abgebrochen"));
+  });
+}
+
+function clearImageInputMeta(fileInput){
+  if (!fileInput) return;
+  const meta = fileInput.parentElement?.querySelector('.img-upload-meta');
+  if (meta) meta.remove();
+}
+
+async function clearPersistedImageInput(fileInput){
+  if (!fileInput) return;
+
+  const oldRef = fileInput.dataset?.imgRef || '';
+
+  clearFileInputSelection(fileInput);
+
+  try{ delete fileInput.dataset.imgRef; }catch(_e){}
+  try{ delete fileInput.dataset.dataUrl; }catch(_e){}
+
+  updateDropzoneState(fileInput, false);
+  clearImageInputMeta(fileInput);
+
+  if (oldRef){
+    try{ await imageStoreDelete(oldRef); }catch(_e){}
+  }
+}
+
 async function compressImageFileWithFallbacks(file, options){
   const variants = [
     { ...(options || {}) },
@@ -1954,40 +2147,92 @@ async function handleGenericImageFileInput(fileInput, file){
   requestPreviewRefresh();
 }
 
+
 function enhanceImageInput(fileInput){
-  if (!fileInput || fileInput.dataset.dropEnhanced === '1') return;
+  if (!fileInput) return;
   if (fileInput.id === 'jsonLoader') return;
+
   const cls = fileInput.className || '';
-  const isEnhanceable = fileInput.id === 'imgFile' || /(^|\s)(p-img|w-img|a-img|m-img|k-img|u-file|f-img|s-img)(\s|$)/.test(cls);
+  const isEnhanceable =
+    fileInput.id === 'imgFile' ||
+    fileInput.id === 'badgeImgFile' ||
+    /(^|\s)(p-img|w-img|a-img|m-img|k-img|u-file|f-img|s-img)(\s|$)/.test(cls);
+
   if (!isEnhanceable) return;
-  fileInput.dataset.dropEnhanced = '1';
 
-  if (fileInput.id !== 'imgFile'){
-    const zone = document.createElement('div');
-    zone.className = 'img-dropzone';
-    zone.innerHTML = '<strong>Bild hier ablegen</strong> oder klicken zum Auswählen';
-    fileInput.insertAdjacentElement('afterend', zone);
-    fileInput._dropzone = zone;
-    updateDropzoneState(fileInput, !!(fileInput.dataset?.imgRef || fileInput.dataset?.dataUrl));
+  let actionWrap = fileInput.parentElement;
+  if (!actionWrap || !actionWrap.classList.contains('img-input-actions')){
+    actionWrap = document.createElement('div');
+    actionWrap.className = 'img-input-actions';
+    actionWrap.style.display = 'flex';
+    actionWrap.style.alignItems = 'center';
+    actionWrap.style.gap = '8px';
+    actionWrap.style.flexWrap = 'wrap';
+    actionWrap.style.marginTop = '4px';
 
-    zone.addEventListener('click', () => fileInput.click());
-    ['dragenter','dragover'].forEach(evt => zone.addEventListener(evt, (ev) => {
-      ev.preventDefault();
-      zone.classList.add('dragover');
-    }));
-    ['dragleave','dragend','drop'].forEach(evt => zone.addEventListener(evt, () => zone.classList.remove('dragover')));
-    zone.addEventListener('drop', async (ev) => {
-      ev.preventDefault();
-      const file = ev.dataTransfer?.files?.[0];
-      if (!file || !String(file.type || '').startsWith('image/')) return;
+    fileInput.parentNode.insertBefore(actionWrap, fileInput);
+    actionWrap.appendChild(fileInput);
+  }
+  fileInput._actionWrap = actionWrap;
+
+  let deleteBtn = actionWrap.querySelector('.img-delete-btn');
+  if (!deleteBtn){
+    deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'btn-secondary img-delete-btn';
+    deleteBtn.textContent = 'Bild löschen';
+    deleteBtn.style.padding = '8px 12px';
+    deleteBtn.style.fontSize = '0.9rem';
+    deleteBtn.addEventListener('click', async () => {
       try{
-        await handleGenericImageFileInput(fileInput, file);
+        await clearSingleImageInput(fileInput);
       }catch(err){
-        console.error('Bild konnte nicht gespeichert werden:', err);
-        alert('Das abgelegte Bild konnte nicht verarbeitet werden.');
+        console.error('Bild konnte nicht gelöscht werden:', err);
+        alert('Das Bild konnte nicht gelöscht werden.');
       }
     });
+    actionWrap.appendChild(deleteBtn);
   }
+
+  if (fileInput.id !== 'imgFile' && fileInput.id !== 'badgeImgFile'){
+    let zone = fileInput._dropzone;
+
+    if (!zone){
+      const existingZone = actionWrap.nextElementSibling;
+      if (existingZone && existingZone.classList && existingZone.classList.contains('img-dropzone')){
+        zone = existingZone;
+      } else {
+        zone = document.createElement('div');
+        zone.className = 'img-dropzone';
+        zone.innerHTML = '<strong>Bild hier ablegen</strong> oder klicken zum Auswählen';
+        actionWrap.insertAdjacentElement('afterend', zone);
+      }
+
+      fileInput._dropzone = zone;
+
+      zone.addEventListener('click', () => fileInput.click());
+      ['dragenter','dragover'].forEach(evt => zone.addEventListener(evt, (ev) => {
+        ev.preventDefault();
+        zone.classList.add('dragover');
+      }));
+      ['dragleave','dragend','drop'].forEach(evt => zone.addEventListener(evt, () => zone.classList.remove('dragover')));
+      zone.addEventListener('drop', async (ev) => {
+        ev.preventDefault();
+        const file = ev.dataTransfer?.files?.[0];
+        if (!file || !String(file.type || '').startsWith('image/')) return;
+        try{
+          await handleGenericImageFileInput(fileInput, file);
+        }catch(err){
+          console.error('Bild konnte nicht gespeichert werden:', err);
+          alert('Das abgelegte Bild konnte nicht verarbeitet werden.');
+        }
+      });
+    }
+
+    updateDropzoneState(fileInput, !!(fileInput.dataset?.imgRef || fileInput.dataset?.dataUrl));
+  }
+
+  fileInput.dataset.dropEnhanced = '1';
 }
 
 function initImageInputEnhancements(root){
@@ -2464,7 +2709,7 @@ async function applyStateToForm(state){
     for (const [idx, ref] of (state.person.pImageRefs || []).entries()) { if (pImgs[idx]) await restoreFileInputImageRef(pImgs[idx], ref); }
   }
 
-  if (state.werdegang && Array.isArray(state.werdegang.entries)){
+    if (state.werdegang && Array.isArray(state.werdegang.entries)){
     const list = document.getElementById("werdegang-liste");
     const entries = state.werdegang.entries.length ? state.werdegang.entries : [{zeit:"", firma:"", task:""}];
     for (const ent of entries) {
@@ -2477,7 +2722,10 @@ async function applyStateToForm(state){
         <div class="w-media">
           <div>
             <label>Logo / Bild (optional)</label>
-            <input type="file" class="w-img" accept="image/*">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <input type="file" class="w-img" accept="image/*">
+              <button class="btn-secondary" onclick="clearSingleImageInput(this.parentElement.querySelector('.w-img'))" type="button">Bild löschen</button>
+            </div>
           </div>
           <div>
             <label>Link zum Eintrag / Unternehmen (optional)</label>
@@ -2487,6 +2735,8 @@ async function applyStateToForm(state){
       `;
       list.appendChild(div);
       await restoreFileInputImageRef(div.querySelector('.w-img'), ent.imageRef || '');
+      initImageInputEnhancements(div);
+      updateDropzoneState(div.querySelector('.w-img'), !!(ent.imageRef || div.querySelector('.w-img')?.dataset?.dataUrl));
     }
   }
 
@@ -2507,7 +2757,10 @@ async function applyStateToForm(state){
         <div class="w-media">
           <div>
             <label>Logo / Bild (optional)</label>
-            <input type="file" class="a-img" accept="image/*">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <input type="file" class="a-img" accept="image/*">
+              <button class="btn-secondary" onclick="clearSingleImageInput(this.parentElement.querySelector('.a-img'))" type="button">Bild löschen</button>
+            </div>
           </div>
           <div>
             <label>Link zum Eintrag / Institution (optional)</label>
@@ -2517,6 +2770,8 @@ async function applyStateToForm(state){
       `;
       list.appendChild(div);
       await restoreFileInputImageRef(div.querySelector('.a-img'), ent.imageRef || '');
+      initImageInputEnhancements(div);
+      updateDropzoneState(div.querySelector('.a-img'), !!(ent.imageRef || div.querySelector('.a-img')?.dataset?.dataUrl));
     }
   }
 
@@ -2584,6 +2839,30 @@ async function loadState(){
   }catch(e){
     console.warn("Konnte nicht laden:", e);
   }
+}
+
+async function clearAllImages(){
+  if (!confirm("Wirklich alle hinterlegten Bilder löschen?")) return;
+
+  const genericInputs = document.querySelectorAll('.p-img, .w-img, .a-img, .m-img, .k-img, .u-file, .f-img, .s-img');
+  for (const input of genericInputs){
+    await clearPersistedImageInput(input);
+  }
+
+  if (typeof window.__BCL_COVER_CLEAR__ === "function"){
+    await window.__BCL_COVER_CLEAR__();
+  }
+
+  if (typeof window.__BCL_BADGE_CLEAR__ === "function"){
+    await window.__BCL_BADGE_CLEAR__();
+  }
+
+  if (typeof refreshMotivationCropEditors === "function"){
+    refreshMotivationCropEditors();
+  }
+
+  scheduleSave();
+  requestPreviewRefresh();
 }
 
 function resetAll(){
@@ -2676,7 +2955,10 @@ function addWerdegang() {
     <div class="w-media">
       <div>
         <label>Logo / Bild (optional)</label>
-        <input type="file" class="w-img" accept="image/*">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <input type="file" class="w-img" accept="image/*">
+          <button class="btn-secondary" onclick="clearSingleImageInput(this.parentElement.querySelector('.w-img'))" type="button">Bild löschen</button>
+        </div>
       </div>
       <div>
         <label>Link zum Eintrag / Unternehmen (optional)</label>
@@ -2701,7 +2983,10 @@ async function addAusbildung(data, doSave = true) {
     <div class="w-media">
       <div>
         <label>Logo / Bild (optional)</label>
-        <input type="file" class="a-img" accept="image/*">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <input type="file" class="a-img" accept="image/*">
+          <button class="btn-secondary" onclick="clearSingleImageInput(this.parentElement.querySelector('.a-img'))" type="button">Bild löschen</button>
+        </div>
       </div>
       <div>
         <label>Link zum Eintrag / Institution (optional)</label>
@@ -3151,7 +3436,7 @@ async function buildPdfDoc(){
 
     lineHeightBullets: 6,
     bulletExtraGap: 1,
-    entryGapAfter: 7
+    entryGapAfter: 4
   };
 
   const name = document.getElementById('name').value || "Portfolio";
@@ -3535,7 +3820,7 @@ async function buildPdfDoc(){
     }
   );
 
-   // --- Seite 3: Werdegang ---
+  // --- Seite 3: Werdegang ---
   doc.addPage('l');
   drawChromeLandscape();
   drawSectionTitle("Beruflicher Werdegang", LAYOUT.marginLeft, 48);
@@ -3543,13 +3828,18 @@ async function buildPdfDoc(){
   let wy = LAYOUT.contentStartY;
   const werdegangTitleX = LAYOUT.marginLeft + 8;
   const werdegangBulletX = LAYOUT.marginLeft + 8;
-  const werdegangImageX = 214;
-  const werdegangTextWidth = 160;
-  const werdegangBulletWidth = 172;
+  const werdegangTextWidth = 180;
+  const werdegangBulletWidth = 180;
   const lineH = LAYOUT.lineHeightBullets;
   const werdegangBottomY = 188;
-  const werdegangImageMaxW = 52;
-  const werdegangImageMaxH = 36;
+
+  const werdegangPageImageSlots = [
+    { x: 222, y: 62, w: 48, h: 28 },
+    { x: 222, y: 96, w: 48, h: 28 },
+    { x: 222, y: 130, w: 48, h: 28 }
+  ];
+
+  let werdegangImagesOnPage = [];
 
   const applyWerdegangEntryStyle = () => {
     doc.setFont(LAYOUT.fontFamily, "bold");
@@ -3557,11 +3847,35 @@ async function buildPdfDoc(){
     doc.setTextColor(...LAYOUT.brandColorRgb);
   };
 
-  const addWerdegangPage = (isContinuation = false) => {
+  async function flushWerdegangPageImages(){
+    for (let i = 0; i < werdegangImagesOnPage.length && i < werdegangPageImageSlots.length; i++) {
+      const item = werdegangImagesOnPage[i];
+      const slot = werdegangPageImageSlots[i];
+      if (!item?.img || !slot) continue;
+
+      const box = drawProportionalImage(
+        doc,
+        item.img,
+        slot.x,
+        slot.y,
+        slot.w,
+        slot.h,
+        { align: "center", vAlign: "middle" }
+      );
+
+      addUrlLinkOnRect(doc, box.x, box.y, box.w, box.h, item.url || "");
+
+      // kein Rahmen um die Werdegang-Bilder
+    }
+  }
+
+  const addWerdegangPage = async (isContinuation = false) => {
+    await flushWerdegangPageImages();
     doc.addPage('l');
     drawChromeLandscape();
     drawSectionTitle(isContinuation ? "Beruflicher Werdegang (Fortsetzung)" : "Beruflicher Werdegang", LAYOUT.marginLeft, 48);
     wy = LAYOUT.contentStartY;
+    werdegangImagesOnPage = [];
     applyWerdegangEntryStyle();
   };
 
@@ -3589,22 +3903,13 @@ async function buildPdfDoc(){
       }
     }
 
-    let imageHeight = 0;
-    if (wImage) {
-      const ratio = wImage.w / wImage.h;
-      let drawW = werdegangImageMaxW;
-      let drawH = drawW / ratio;
-      if (drawH > werdegangImageMaxH) {
-        drawH = werdegangImageMaxH;
-        drawW = drawH * ratio;
-      }
-      imageHeight = drawH;
-    }
+    const neededHeight = textHeight + 4;
 
-    const neededHeight = Math.max(textHeight, imageHeight) + LAYOUT.entryGapAfter;
+    const needsNewPageForText = (wy + neededHeight > werdegangBottomY);
+    const needsNewPageForImages = !!wImage && (werdegangImagesOnPage.length >= 3);
 
-    if (wy + neededHeight > werdegangBottomY) {
-      addWerdegangPage(idx > 0);
+    if (needsNewPageForText || needsNewPageForImages) {
+      await addWerdegangPage(idx > 0);
       applyWerdegangEntryStyle();
     }
 
@@ -3626,23 +3931,19 @@ async function buildPdfDoc(){
       }
     }
 
-    if (wImage) {
-      const box = drawProportionalImage(
-        doc,
-        wImage,
-        werdegangImageX,
-        wy + 1,
-        werdegangImageMaxW,
-        werdegangImageMaxH,
-        { align: "center", vAlign: "middle" }
-      );
-      addUrlLinkOnRect(doc, box.x, box.y, box.w, box.h, (wLinkInput ? wLinkInput.value : ""));
+    if (wImage && werdegangImagesOnPage.length < 3) {
+      werdegangImagesOnPage.push({
+        img: wImage,
+        url: (wLinkInput ? wLinkInput.value : "")
+      });
     }
 
     wy += neededHeight;
   }
 
-  // --- Seite 4: Ausbildung ---
+  await flushWerdegangPageImages();
+
+   // --- Seite 4: Ausbildung ---
   doc.addPage('l');
   drawChromeLandscape();
   drawSectionTitle("Ausbildung & Studium", LAYOUT.marginLeft, 48);
@@ -3650,12 +3951,17 @@ async function buildPdfDoc(){
   let ay = LAYOUT.contentStartY;
   const ausbildungTitleX = LAYOUT.marginLeft;
   const ausbildungBulletX = LAYOUT.marginLeft;
-  const ausbildungImageX = 214;
-  const ausbildungTextWidth = 165;
-  const ausbildungBulletWidth = 172;
+  const ausbildungTextWidth = 180;
+  const ausbildungBulletWidth = 180;
   const ausbildungBottomY = 188;
-  const ausbildungImageMaxW = 52;
-  const ausbildungImageMaxH = 36;
+
+  const ausbildungPageImageSlots = [
+    { x: 222, y: 62, w: 48, h: 28 },
+    { x: 222, y: 96, w: 48, h: 28 },
+    { x: 222, y: 130, w: 48, h: 28 }
+  ];
+
+  let ausbildungImagesOnPage = [];
 
   const applyAusbildungEntryStyle = () => {
     doc.setFont(LAYOUT.fontFamily, "bold");
@@ -3663,11 +3969,33 @@ async function buildPdfDoc(){
     doc.setTextColor(...LAYOUT.brandColorRgb);
   };
 
-  const addAusbildungPage = (isContinuation = false) => {
+  async function flushAusbildungPageImages(){
+    for (let i = 0; i < ausbildungImagesOnPage.length && i < ausbildungPageImageSlots.length; i++) {
+      const item = ausbildungImagesOnPage[i];
+      const slot = ausbildungPageImageSlots[i];
+      if (!item?.img || !slot) continue;
+
+      const box = drawProportionalImage(
+        doc,
+        item.img,
+        slot.x,
+        slot.y,
+        slot.w,
+        slot.h,
+        { align: "center", vAlign: "middle" }
+      );
+
+      addUrlLinkOnRect(doc, box.x, box.y, box.w, box.h, item.url || "");
+    }
+  }
+
+  const addAusbildungPage = async (isContinuation = false) => {
+    await flushAusbildungPageImages();
     doc.addPage('l');
     drawChromeLandscape();
     drawSectionTitle(isContinuation ? "Ausbildung & Studium (Fortsetzung)" : "Ausbildung & Studium", LAYOUT.marginLeft, 48);
     ay = LAYOUT.contentStartY;
+    ausbildungImagesOnPage = [];
     applyAusbildungEntryStyle();
   };
 
@@ -3702,22 +4030,13 @@ async function buildPdfDoc(){
       }
     }
 
-    let imageHeight = 0;
-    if (aImage) {
-      const ratio = aImage.w / aImage.h;
-      let drawW = ausbildungImageMaxW;
-      let drawH = drawW / ratio;
-      if (drawH > ausbildungImageMaxH) {
-        drawH = ausbildungImageMaxH;
-        drawW = drawH * ratio;
-      }
-      imageHeight = drawH;
-    }
+    const neededHeight = textHeight + 4;
 
-    const neededHeight = Math.max(textHeight, imageHeight) + LAYOUT.entryGapAfter;
+    const needsNewPageForText = (ay + neededHeight > ausbildungBottomY);
+    const needsNewPageForImages = !!aImage && (ausbildungImagesOnPage.length >= 3);
 
-    if (ay + neededHeight > ausbildungBottomY) {
-      addAusbildungPage(idx > 0);
+    if (needsNewPageForText || needsNewPageForImages) {
+      await addAusbildungPage(idx > 0);
       applyAusbildungEntryStyle();
     }
 
@@ -3744,32 +4063,68 @@ async function buildPdfDoc(){
       }
     }
 
-    if (aImage) {
-      const box = drawProportionalImage(
-        doc,
-        aImage,
-        ausbildungImageX,
-        ay - 1,
-        ausbildungImageMaxW,
-        ausbildungImageMaxH,
-        { align: "center", vAlign: "middle" }
-      );
-      addUrlLinkOnRect(doc, box.x, box.y, box.w, box.h, link);
+    if (aImage && ausbildungImagesOnPage.length < 3) {
+      ausbildungImagesOnPage.push({
+        img: aImage,
+        url: link
+      });
     }
 
     ay += neededHeight;
   }
 
+  await flushAusbildungPageImages();
+
+
+
     // --- Seite 5: Fort- & Weiterbildungen ---
   doc.addPage('l');
   drawChromeLandscape();
   drawSectionTitle("Fort- & Weiterbildungen", LAYOUT.marginLeft, 48);
+
   let fy = 68;
-  const fortImageX = 214;
-  const fortImageMaxW = 52;
-  const fortImageMaxH = 36;
+  const fortTextWidth = 180;
+  const fortBottomY = 188;
+  const fortPageImageSlots = [
+    { x: 222, y: 62, w: 48, h: 28 },
+    { x: 222, y: 96, w: 48, h: 28 },
+    { x: 222, y: 130, w: 48, h: 28 }
+  ];
+
+  let fortImagesOnPage = [];
+
+  async function flushFortPageImages(){
+    for (let i = 0; i < fortImagesOnPage.length && i < fortPageImageSlots.length; i++) {
+      const item = fortImagesOnPage[i];
+      const slot = fortPageImageSlots[i];
+      if (!item?.img || !slot) continue;
+
+      const box = drawProportionalImage(
+        doc,
+        item.img,
+        slot.x,
+        slot.y,
+        slot.w,
+        slot.h,
+        { align: 'center', vAlign: 'middle' }
+      );
+
+      addUrlLinkOnRect(doc, box.x, box.y, box.w, box.h, item.url || '');
+    }
+  }
+
+  const addFortPage = async (isContinuation = false) => {
+    await flushFortPageImages();
+    doc.addPage('l');
+    drawChromeLandscape();
+    drawSectionTitle(isContinuation ? 'Fort- & Weiterbildungen (Fortsetzung)' : 'Fort- & Weiterbildungen', LAYOUT.marginLeft, 48);
+    fy = 68;
+    fortImagesOnPage = [];
+  };
+
   const fortEntries = Array.from(document.querySelectorAll('.fortbildung-entry'));
-  for (const e of fortEntries) {
+  for (let idx = 0; idx < fortEntries.length; idx++) {
+    const e = fortEntries[idx];
     const zeit = (e.querySelector('.f-zeit')?.value || '').trim();
     const titel = (e.querySelector('.f-titel')?.value || '').trim();
     const details = (e.querySelector('.f-details')?.value || '').trim();
@@ -3777,50 +4132,90 @@ async function buildPdfDoc(){
     const hasText = zeit || titel || details;
     const img = await processImage(e.querySelector('.f-img'));
     if (!hasText && !img) continue;
-    if (fy > 170) {
-      doc.addPage('l');
-      drawChromeLandscape();
-      drawSectionTitle('Fort- & Weiterbildungen (Fortsetzung)', LAYOUT.marginLeft, 48);
-      fy = 68;
+
+    const textLines = [];
+    if (zeit) textLines.push('Zeitraum: ' + zeit);
+    if (details) textLines.push(...doc.splitTextToSize(details, fortTextWidth));
+    if (link) textLines.push('Link: ' + safeUrl(link));
+
+    let blockH = Math.max(18, (textLines.length * 5) + (titel ? 7 : 0) + 4);
+
+    const needsNewPageForText = (fy + blockH > fortBottomY);
+    const needsNewPageForImages = !!img && (fortImagesOnPage.length >= 3);
+
+    if (needsNewPageForText || needsNewPageForImages) {
+      await addFortPage(idx > 0);
     }
+
     doc.setFont(LAYOUT.fontFamily, 'bold');
     doc.setFontSize(LAYOUT.sizeBody13);
     doc.setTextColor(...LAYOUT.textColorRgb);
     if (titel) doc.text(titel, LAYOUT.marginLeft, fy);
+
     doc.setFont(LAYOUT.fontFamily, 'normal');
     doc.setFontSize(LAYOUT.sizeBody12);
-    const textLines = [];
-    if (zeit) textLines.push('Zeitraum: ' + zeit);
-    if (details) textLines.push(...doc.splitTextToSize(details, 150));
-    if (link) textLines.push('Link: ' + safeUrl(link));
     doc.text(textLines, LAYOUT.marginLeft, fy + (titel ? 7 : 0));
-    let blockH = Math.max(18, (textLines.length * 5) + (titel ? 7 : 0));
-    if (img){
-      const box = drawProportionalImage(
-        doc,
+
+    if (img && fortImagesOnPage.length < 3){
+      fortImagesOnPage.push({
         img,
-        fortImageX,
-        fy - 1,
-        fortImageMaxW,
-        fortImageMaxH,
-        { align: 'center', vAlign: 'middle' }
-      );
-      addUrlLinkOnRect(doc, box.x, box.y, box.w, box.h, link);
-      blockH = Math.max(blockH, box.h + 4);
+        url: link
+      });
     }
-    fy += blockH + 8;
+
+    fy += blockH + 4;
   }
+
+  await flushFortPageImages();
 
   // --- Seite 6: Schulbildung ---
   doc.addPage('l');
   drawChromeLandscape();
   drawSectionTitle("Schulbildung", LAYOUT.marginLeft, 48);
+
   let sy = 68;
-  const schoolImageX = 214;
-  const schoolImageMaxW = 52;
-  const schoolImageMaxH = 36;
+  const schoolTextWidth = 180;
+  const schoolBottomY = 188;
+  const schoolPageImageSlots = [
+    { x: 222, y: 62, w: 48, h: 28 },
+    { x: 222, y: 96, w: 48, h: 28 },
+    { x: 222, y: 130, w: 48, h: 28 }
+  ];
+
+  let schoolImagesOnPage = [];
+
+  async function flushSchoolPageImages(){
+    for (let i = 0; i < schoolImagesOnPage.length && i < schoolPageImageSlots.length; i++) {
+      const item = schoolImagesOnPage[i];
+      const slot = schoolPageImageSlots[i];
+      if (!item?.img || !slot) continue;
+
+      const box = drawProportionalImage(
+        doc,
+        item.img,
+        slot.x,
+        slot.y,
+        slot.w,
+        slot.h,
+        { align: 'center', vAlign: 'middle' }
+      );
+
+      addUrlLinkOnRect(doc, box.x, box.y, box.w, box.h, item.url || '');
+    }
+  }
+
+  const addSchoolPage = async (isContinuation = false) => {
+    await flushSchoolPageImages();
+    doc.addPage('l');
+    drawChromeLandscape();
+    drawSectionTitle(isContinuation ? 'Schulbildung (Fortsetzung)' : 'Schulbildung', LAYOUT.marginLeft, 48);
+    sy = 68;
+    schoolImagesOnPage = [];
+  };
+
   const schoolEntries = Array.from(document.querySelectorAll('.schulbildung-entry'));
-  for (const e of schoolEntries) {
+  for (let idx = 0; idx < schoolEntries.length; idx++) {
+    const e = schoolEntries[idx];
     const zeit = (e.querySelector('.s-zeit')?.value || '').trim();
     const schule = (e.querySelector('.s-schule')?.value || '').trim();
     const abschluss = (e.querySelector('.s-abschluss')?.value || '').trim();
@@ -3829,40 +4224,42 @@ async function buildPdfDoc(){
     const hasText = zeit || schule || abschluss || details;
     const img = await processImage(e.querySelector('.s-img'));
     if (!hasText && !img) continue;
-    if (sy > 170) {
-      doc.addPage('l');
-      drawChromeLandscape();
-      drawSectionTitle('Schulbildung (Fortsetzung)', LAYOUT.marginLeft, 48);
-      sy = 68;
+
+    const textLines = [];
+    if (zeit) textLines.push('Zeitraum: ' + zeit);
+    if (abschluss) textLines.push('Abschluss: ' + abschluss);
+    if (details) textLines.push(...doc.splitTextToSize(details, schoolTextWidth));
+    if (link) textLines.push('Link: ' + safeUrl(link));
+
+    let blockH = Math.max(18, (textLines.length * 5) + (schule ? 7 : 0) + 4);
+
+    const needsNewPageForText = (sy + blockH > schoolBottomY);
+    const needsNewPageForImages = !!img && (schoolImagesOnPage.length >= 3);
+
+    if (needsNewPageForText || needsNewPageForImages) {
+      await addSchoolPage(idx > 0);
     }
+
     doc.setFont(LAYOUT.fontFamily, 'bold');
     doc.setFontSize(LAYOUT.sizeBody13);
     doc.setTextColor(...LAYOUT.textColorRgb);
     if (schule) doc.text(schule, LAYOUT.marginLeft, sy);
+
     doc.setFont(LAYOUT.fontFamily, 'normal');
     doc.setFontSize(LAYOUT.sizeBody12);
-    const textLines = [];
-    if (zeit) textLines.push('Zeitraum: ' + zeit);
-    if (abschluss) textLines.push('Abschluss: ' + abschluss);
-    if (details) textLines.push(...doc.splitTextToSize(details, 150));
-    if (link) textLines.push('Link: ' + safeUrl(link));
     doc.text(textLines, LAYOUT.marginLeft, sy + (schule ? 7 : 0));
-    let blockH = Math.max(18, (textLines.length * 5) + (schule ? 7 : 0));
-    if (img){
-      const box = drawProportionalImage(
-        doc,
+
+    if (img && schoolImagesOnPage.length < 3){
+      schoolImagesOnPage.push({
         img,
-        schoolImageX,
-        sy - 1,
-        schoolImageMaxW,
-        schoolImageMaxH,
-        { align: 'center', vAlign: 'middle' }
-      );
-      addUrlLinkOnRect(doc, box.x, box.y, box.w, box.h, link);
-      blockH = Math.max(blockH, box.h + 4);
+        url: link
+      });
     }
-    sy += blockH + 8;
+
+    sy += blockH + 4;
   }
+
+  await flushSchoolPageImages();
 
   // --- Seite 7: Motivation ---
   doc.addPage('l');
@@ -4245,6 +4642,48 @@ function initBadgeControl(){
     imageRef: state.imageRef, dataUrl: state.imgDataUrl, x: state.x, y: state.y, scalePct: state.scalePct,
     baseW: state.baseW, baseH: state.baseH, stageW: state.stageW, stageH: state.stageH
   });
+
+  window.__BCL_BADGE_CLEAR__ = async () => {
+    const oldRef = state.imageRef || '';
+
+    state.imgDataUrl = '';
+    state.imageRef = '';
+    state.x = 0;
+    state.y = 0;
+    state.scalePct = 100;
+    state.baseW = 0;
+    state.baseH = 0;
+
+    if (img){
+      img.src = '';
+      img.style.display = 'none';
+      img.style.left = '50%';
+      img.style.top = '50%';
+      img.style.transform = 'translate(-50%, -50%) scale(1)';
+    }
+
+    if (stage){
+      stage.classList.remove('has-image');
+      stage.dataset.dropHint = 'Kopfbild für Portfolioseite\nziehen oder klicken';
+    }
+
+    if (scale) scale.value = '100';
+    if (scaleVal) scaleVal.textContent = '100%';
+
+    clearFileInputSelection(fileInput);
+    if (fileInput){
+      try{ delete fileInput.dataset.imgRef; }catch(_e){}
+      try{ delete fileInput.dataset.dataUrl; }catch(_e){}
+    }
+
+    syncHidden();
+    applyTransform();
+
+    if (oldRef){
+      try{ await imageStoreDelete(oldRef); }catch(_e){}
+    }
+  };
+
   window.__BCL_BADGE_APPLY__ = (s) => {
     state.x = parseFloat(s.x || 0);
     state.y = parseFloat(s.y || 0);
@@ -4467,6 +4906,53 @@ Optimiert: ${originalSize} → ${optimizedSize}`;
     stageW: state.stageW,
     stageH: state.stageH
   });
+
+  window.__BCL_COVER_CLEAR__ = async () => {
+    const oldRef = state.imageRef || '';
+
+    state.imgDataUrl = "";
+    state.imageRef = "";
+    state.x = 0;
+    state.y = 0;
+    state.scalePct = 100;
+    state.baseW = 0;
+    state.baseH = 0;
+
+    if (img){
+      img.src = "";
+      img.style.display = "none";
+      img.style.left = "50%";
+      img.style.top = "50%";
+      img.style.transform = "translate(-50%, -50%) scale(1)";
+    }
+
+    if (stage){
+      stage.classList.remove('has-image');
+      stage.dataset.dropHint = 'Bild hier ablegen oder klicken';
+    }
+
+    if (scale) scale.value = "100";
+    if (scaleVal) scaleVal.textContent = "100%";
+
+    clearFileInputSelection(fileInput);
+    if (fileInput){
+      try{ delete fileInput.dataset.imgRef; }catch(_e){}
+      try{ delete fileInput.dataset.dataUrl; }catch(_e){}
+    }
+
+    const mini = document.getElementById("imgPreview");
+    if (mini){
+      mini.src = "";
+      mini.style.display = "none";
+    }
+
+    syncHidden();
+    applyTransform();
+
+    if (oldRef){
+      try{ await imageStoreDelete(oldRef); }catch(_e){}
+    }
+  };
 
   window.__BCL_COVER_APPLY__ = (s) => {
     state.x = parseFloat(s.x || 0);
