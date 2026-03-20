@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "./lib/verifyToken";
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const tokenFromUrl = req.nextUrl.searchParams.get("token");
   const tokenFromCookie = req.cookies.get("access_token")?.value ?? null;
 
-  if (verifyToken(tokenFromUrl)) {
+  if (await verifyToken(tokenFromUrl)) {
     const cleanUrl = req.nextUrl.clone();
     cleanUrl.searchParams.delete("token");
 
@@ -20,7 +20,7 @@ export function middleware(req: NextRequest) {
     return response;
   }
 
-  if (verifyToken(tokenFromCookie)) {
+  if (await verifyToken(tokenFromCookie)) {
     return NextResponse.next();
   }
 
